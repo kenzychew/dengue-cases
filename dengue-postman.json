@@ -1,0 +1,402 @@
+{
+  "info": {
+    "_postman_id": "dengue-cases-api-collection",
+    "name": "Singapore Dengue Cases API",
+    "description": "API endpoints for Singapore Weekly Dengue and DHF Cases data from data.gov.sg",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Dengue Data",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response has success field\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('success');",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "});",
+              "",
+              "pm.test(\"Response has records\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.result).to.have.property('records');",
+              "    pm.expect(jsonData.result.records).to.be.an('array');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://data.gov.sg/api/action/datastore_search?resource_id={{dataset_id}}&limit={{limit}}",
+          "protocol": "https",
+          "host": ["data", "gov", "sg"],
+          "path": ["api", "action", "datastore_search"],
+          "query": [
+            {
+              "key": "resource_id",
+              "value": "{{dataset_id}}",
+              "description": "Dataset ID for dengue cases"
+            },
+            {
+              "key": "limit",
+              "value": "{{limit}}",
+              "description": "Maximum number of records to return"
+            }
+          ]
+        },
+        "description": "Fetches all dengue and DHF cases data from 2014-2018. Default limit is 100, but we increase to 1000 to get all records."
+      },
+      "response": [
+        {
+          "name": "All Data Response Example",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://data.gov.sg/api/action/datastore_search?resource_id=d_ac1eecf0886ff0bceefbc51556247015&limit=5",
+              "protocol": "https",
+              "host": ["data", "gov", "sg"],
+              "path": ["api", "action", "datastore_search"],
+              "query": [
+                {
+                  "key": "resource_id",
+                  "value": "d_ac1eecf0886ff0bceefbc51556247015"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"help\": \"https://data.gov.sg/api/3/action/help_show?name=datastore_search\",\n    \"success\": true,\n    \"result\": {\n        \"resource_id\": \"d_ac1eecf0886ff0bceefbc51556247015\",\n        \"fields\": [\n            {\"type\": \"text\", \"id\": \"year\"},\n            {\"type\": \"text\", \"id\": \"eweek\"},\n            {\"type\": \"text\", \"id\": \"type_dengue\"},\n            {\"type\": \"text\", \"id\": \"number\"}\n        ],\n        \"records\": [\n            {\"year\": \"2014\", \"eweek\": \"1\", \"type_dengue\": \"Dengue\", \"number\": \"436\"},\n            {\"year\": \"2014\", \"eweek\": \"1\", \"type_dengue\": \"DHF\", \"number\": \"0\"},\n            {\"year\": \"2014\", \"eweek\": \"2\", \"type_dengue\": \"Dengue\", \"number\": \"341\"},\n            {\"year\": \"2014\", \"eweek\": \"2\", \"type_dengue\": \"DHF\", \"number\": \"0\"},\n            {\"year\": \"2014\", \"eweek\": \"3\", \"type_dengue\": \"Dengue\", \"number\": \"293\"}\n        ],\n        \"total\": 530\n    }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Dengue Data by Year",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response filtered by year\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var year = pm.collectionVariables.get('filter_year');",
+              "    if (jsonData.result.records.length > 0) {",
+              "        pm.expect(jsonData.result.records[0].year).to.eql(year);",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://data.gov.sg/api/action/datastore_search?resource_id={{dataset_id}}&filters={{year_filter}}&limit=110",
+          "protocol": "https",
+          "host": ["data", "gov", "sg"],
+          "path": ["api", "action", "datastore_search"],
+          "query": [
+            {
+              "key": "resource_id",
+              "value": "{{dataset_id}}"
+            },
+            {
+              "key": "filters",
+              "value": "{{year_filter}}",
+              "description": "JSON filter for specific year e.g. {\"year\": \"2018\"}"
+            },
+            {
+              "key": "limit",
+              "value": "110",
+              "description": "Higher limit to get all weeks for the year"
+            }
+          ]
+        },
+        "description": "Fetches dengue data filtered by a specific year (2014-2018)"
+      },
+      "response": [
+        {
+          "name": "Year 2018 Example",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://data.gov.sg/api/action/datastore_search?resource_id=d_ac1eecf0886ff0bceefbc51556247015&filters={\"year\": \"2018\"}&limit=200",
+              "protocol": "https",
+              "host": ["data", "gov", "sg"],
+              "path": ["api", "action", "datastore_search"],
+              "query": [
+                {
+                  "key": "resource_id",
+                  "value": "d_ac1eecf0886ff0bceefbc51556247015"
+                },
+                {
+                  "key": "filters",
+                  "value": "{\"year\": \"2018\"}"
+                },
+                {
+                  "key": "limit",
+                  "value": "110"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"success\": true,\n    \"result\": {\n        \"records\": [\n            {\"year\": \"2018\", \"eweek\": \"1\", \"type_dengue\": \"Dengue\", \"number\": \"181\"},\n            {\"year\": \"2018\", \"eweek\": \"1\", \"type_dengue\": \"DHF\", \"number\": \"0\"}\n        ],\n        \"total\": 106\n    }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Dengue Data by Year and Week",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response filtered by year and week\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    if (jsonData.result.records.length > 0) {",
+              "        pm.expect(jsonData.result.records[0].year).to.eql('2018');",
+              "        pm.expect(jsonData.result.records[0].eweek).to.eql('52');",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://data.gov.sg/api/action/datastore_search?resource_id={{dataset_id}}&filters={{week_filter}}",
+          "protocol": "https",
+          "host": ["data", "gov", "sg"],
+          "path": ["api", "action", "datastore_search"],
+          "query": [
+            {
+              "key": "resource_id",
+              "value": "{{dataset_id}}"
+            },
+            {
+              "key": "filters",
+              "value": "{{week_filter}}",
+              "description": "JSON filter for specific year and week e.g. {\"year\": \"2018\", \"eweek\": \"52\"}"
+            }
+          ]
+        },
+        "description": "Fetches dengue data for a specific year and week combination"
+      },
+      "response": [
+        {
+          "name": "Week 52 of 2018 Example",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://data.gov.sg/api/action/datastore_search?resource_id=d_ac1eecf0886ff0bceefbc51556247015&filters={\"year\": \"2018\", \"eweek\": \"52\"}",
+              "protocol": "https",
+              "host": ["data", "gov", "sg"],
+              "path": ["api", "action", "datastore_search"],
+              "query": [
+                {
+                  "key": "resource_id",
+                  "value": "d_ac1eecf0886ff0bceefbc51556247015"
+                },
+                {
+                  "key": "filters",
+                  "value": "{\"year\": \"2018\", \"eweek\": \"52\"}"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"success\": true,\n    \"result\": {\n        \"records\": [\n            {\"year\": \"2018\", \"eweek\": \"52\", \"type_dengue\": \"Dengue\", \"number\": \"181\"},\n            {\"year\": \"2018\", \"eweek\": \"52\", \"type_dengue\": \"DHF\", \"number\": \"0\"}\n        ],\n        \"total\": 2\n    }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Available Years",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Has year data\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.result.records).to.be.an('array');",
+              "    pm.expect(jsonData.result.records.length).to.be.greaterThan(0);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://data.gov.sg/api/action/datastore_search?resource_id={{dataset_id}}&fields=year&limit=2000",
+          "protocol": "https",
+          "host": ["data", "gov", "sg"],
+          "path": ["api", "action", "datastore_search"],
+          "query": [
+            {
+              "key": "resource_id",
+              "value": "{{dataset_id}}"
+            },
+            {
+              "key": "fields",
+              "value": "year",
+              "description": "Only return year field to get available years"
+            },
+            {
+              "key": "limit",
+              "value": "2000",
+              "description": "Get all records to extract unique years"
+            }
+          ]
+        },
+        "description": "Gets all records with only year field to determine available years (2014-2018)"
+      }
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "dataset_id",
+      "value": "d_ac1eecf0886ff0bceefbc51556247015",
+      "type": "string",
+      "description": "Singapore Dengue Cases Dataset ID"
+    },
+    {
+      "key": "limit",
+      "value": "1000",
+      "type": "string",
+      "description": "Default limit for fetching records"
+    },
+    {
+      "key": "year_filter",
+      "value": "{\"year\": \"2018\"}",
+      "type": "string",
+      "description": "JSON filter for specific year"
+    },
+    {
+      "key": "week_filter",
+      "value": "{\"year\": \"2018\", \"eweek\": \"52\"}",
+      "type": "string",
+      "description": "JSON filter for specific year and week"
+    },
+    {
+      "key": "filter_year",
+      "value": "2018",
+      "type": "string",
+      "description": "Year value for testing"
+    }
+  ]
+}
