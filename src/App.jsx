@@ -1,35 +1,141 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { useDengueData } from './hooks/useDengueData';
+import DashboardLayout from './components/Layout/DashboardLayout';
+import FilterControls from './components/UI/FilterControls';
+import DataSummary from './components/UI/DataSummary';
+import DengueChart from './components/Charts/DengueChart';
+import DataTable from './components/Table/DataTable';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const {
+    loading,
+    filtering,
+    error,
+    data,
+    filteredData,
+    chartData,
+    availableYears,
+    totalRecords,
+    dengueCount,
+    dhfCount,
+    selectedYear,
+    selectedWeek,
+    filterByYear,
+    filterByWeek,
+    clearFilters
+  } = useDengueData();
+
+  const handleYearChange = (e) => {
+    const year = e.target.value;
+    if (year === '') {
+      clearFilters();
+    } else {
+      filterByYear(parseInt(year));
+    }
+  };
+
+  const handleWeekChange = (e) => {
+    const week = e.target.value;
+    if (week === '' || !selectedYear) {
+      if (selectedYear) {
+        filterByYear(selectedYear);
+      } else {
+        clearFilters();
+      }
+    } else {
+      filterByWeek(selectedYear, parseInt(week));
+    }
+  };
+
+  // Weeks for selected year from original dataset (53)
+  const getAvailableWeeks = () => {
+    if (!selectedYear || !data.length) return [];
+    
+    const yearData = data.filter(record => record.year === selectedYear);
+    const weeks = [...new Set(yearData.map(record => record.eweek))];
+    return weeks.sort((a, b) => a - b);
+  };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex justify-center items-center min-h-96">
+          <div>
+            <progress className="progress progress-primary mb-4"></progress>
+            <p>Loading dengue data...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="flex justify-center items-center min-h-96">
+          <div role="alert" className="alert alert-error">
+            <div>
+              <h3 className="font-bold">Error loading data</h3>
+              <div>{error}</div>
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <DashboardLayout>
+      {/* Filter Overlay */}
+      {filtering && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-base-100/50 backdrop-blur-sm">
+          <div>
+            <progress className="progress progress-primary mb-4"></progress>
+            <p>Updating data...</p>
+          </div>
+        </div>
+      )}
 
-export default App
+      {/* Content */}
+      <div className={filtering ? 'pointer-events-none' : ''}>
+        <FilterControls
+          availableYears={availableYears}
+          selectedYear={selectedYear}
+          selectedWeek={selectedWeek}
+          availableWeeks={getAvailableWeeks()}
+          onYearChange={handleYearChange}
+          onWeekChange={handleWeekChange}
+          onClearFilters={clearFilters}
+        />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <DengueChart 
+            data={chartData.dengue} 
+            title="Dengue Cases Over Time"
+            color="#10B981"
+          />
+          <DengueChart 
+            data={chartData.dhf} 
+            title="DHF Cases Over Time"
+            color="#f87171"
+          />
+        </div>
+
+        <DataSummary
+          totalRecords={totalRecords}
+          dengueCount={dengueCount}
+          dhfCount={dhfCount}
+        />
+
+        <DataTable
+          data={filteredData}
+          totalRecords={totalRecords}
+          showLimit={10}
+        />
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default App;
