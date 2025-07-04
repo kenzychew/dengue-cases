@@ -10,7 +10,6 @@ import './App.css';
 const App = () => {
   const {
     loading,
-    filtering,
     error,
     data,
     filteredData,
@@ -48,7 +47,7 @@ const App = () => {
     }
   };
 
-  // Weeks for selected year from original dataset (53)
+  // Weeks for selected year from original dataset
   const getAvailableWeeks = () => {
     if (!selectedYear || !data.length) return [];
     
@@ -87,53 +86,40 @@ const App = () => {
 
   return (
     <DashboardLayout>
-      {/* Filter Overlay */}
-      {filtering && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-base-100/50 backdrop-blur-sm">
-          <div>
-            <progress className="progress progress-primary mb-4"></progress>
-            <p>Updating data...</p>
-          </div>
-        </div>
-      )}
+      <FilterControls
+        availableYears={availableYears}
+        selectedYear={selectedYear}
+        selectedWeek={selectedWeek}
+        availableWeeks={getAvailableWeeks()}
+        onYearChange={handleYearChange}
+        onWeekChange={handleWeekChange}
+        onClearFilters={clearFilters}
+      />
 
-      {/* Content */}
-      <div className={filtering ? 'pointer-events-none' : ''}>
-        <FilterControls
-          availableYears={availableYears}
-          selectedYear={selectedYear}
-          selectedWeek={selectedWeek}
-          availableWeeks={getAvailableWeeks()}
-          onYearChange={handleYearChange}
-          onWeekChange={handleWeekChange}
-          onClearFilters={clearFilters}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <DengueChart 
+          data={chartData.dengue} 
+          title="Dengue Cases Over Time"
+          color="#10B981"
         />
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <DengueChart 
-            data={chartData.dengue} 
-            title="Dengue Cases Over Time"
-            color="#10B981"
-          />
-          <DengueChart 
-            data={chartData.dhf} 
-            title="DHF Cases Over Time"
-            color="#f87171"
-          />
-        </div>
-
-        <DataSummary
-          totalRecords={totalRecords}
-          dengueCount={dengueCount}
-          dhfCount={dhfCount}
-        />
-
-        <DataTable
-          data={filteredData}
-          totalRecords={totalRecords}
-          showLimit={10}
+        <DengueChart 
+          data={chartData.dhf} 
+          title="DHF Cases Over Time"
+          color="#f87171"
         />
       </div>
+
+      <DataSummary
+        totalRecords={totalRecords}
+        dengueCount={dengueCount}
+        dhfCount={dhfCount}
+      />
+
+      <DataTable
+        data={filteredData}
+        totalRecords={totalRecords}
+        showLimit={10}
+      />
     </DashboardLayout>
   );
 };
