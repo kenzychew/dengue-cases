@@ -13,7 +13,9 @@ const DashboardLayout = ({ children }) => {
           </p>
         </header>
         
-        {children}
+        <main>
+          {children}
+        </main>
       </div>
     </div>
   );
