@@ -57,12 +57,12 @@ export const useDengueData = () => {
       setError(null);
 
       try {
-        const apiResponse = await fetchDengueData(); // Single API call
-        // console.log(apiResponse);
+        const res = await fetchDengueData(); // Single API call
+        // console.log(res);
 
         // Data transformation
-        if (apiResponse.success) {
-          const processedRecords = apiResponse.result.records.map((record) => ({
+        if (res.success) {
+          const processedRecords = res.result.records.map((record) => ({
             ...record,
             year: parseInt(record.year),
             eweek: parseInt(record.eweek),
@@ -101,10 +101,10 @@ export const useDengueData = () => {
     setSelectedWeek(null);
   };
 
-  // Filter by week
+  // Filter by week - show all weeks in year but tracks the selected week
   const filterByWeek = (year, week) => {
-    const weekData = data.filter((r) => r.year === year && r.eweek === week);
-    setFilteredData(weekData);
+    const yearData = data.filter((r) => r.year === year);
+    setFilteredData(yearData); //
     setSelectedYear(year);
     setSelectedWeek(week);
   };
@@ -116,6 +116,26 @@ export const useDengueData = () => {
     setSelectedYear(null);
     setSelectedWeek(null);
   };
+
+  // Calculate summary stats - use selected week data if week is selected
+  const getSummaryData = () => {
+    if (selectedWeek && selectedYear) {
+      // Show numbers for the selected week only
+      const weekData = data.filter((r) => r.year === selectedYear && r.eweek === selectedWeek);
+      return {
+        dengueCount: caseCountByType(weekData, 'Dengue'),
+        dhfCount: caseCountByType(weekData, 'DHF'),
+      };
+    } else {
+      // Show numbers for the filtered data (year or all data)
+      return {
+        dengueCount: caseCountByType(filteredData, 'Dengue'),
+        dhfCount: caseCountByType(filteredData, 'DHF'),
+      };
+    }
+  };
+
+  const summaryData = getSummaryData();
 
   return {
     // Data
@@ -136,8 +156,7 @@ export const useDengueData = () => {
     clearFilters,
 
     // Values (DataSummary)
-    totalRecords: filteredData.length,
-    dengueCount: caseCountByType(filteredData, 'Dengue'),
-    dhfCount: caseCountByType(filteredData, 'DHF'),
+    dengueCount: summaryData.dengueCount,
+    dhfCount: summaryData.dhfCount,
   };
 };

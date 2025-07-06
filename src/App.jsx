@@ -15,7 +15,6 @@ const App = () => {
     filteredData,
     chartData,
     availableYears,
-    totalRecords,
     dengueCount,
     dhfCount,
     selectedYear,
@@ -59,12 +58,12 @@ const App = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex justify-center items-center min-h-96">
+        <section className="flex justify-center items-center min-h-96">
           <div>
             <progress className="progress progress-primary mb-4"></progress>
             <p>Loading dengue data...</p>
           </div>
-        </div>
+        </section>
       </DashboardLayout>
     );
   }
@@ -72,31 +71,33 @@ const App = () => {
   if (error) {
     return (
       <DashboardLayout>
-        <div className="flex justify-center items-center min-h-96">
+        <section className="flex justify-center items-center min-h-96">
           <div role="alert" className="alert alert-error">
             <div>
               <h3 className="font-bold">Error loading data</h3>
               <div>{error}</div>
             </div>
           </div>
-        </div>
+        </section>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout>
-      <FilterControls
-        availableYears={availableYears}
-        selectedYear={selectedYear}
-        selectedWeek={selectedWeek}
-        availableWeeks={getAvailableWeeks()}
-        onYearChange={handleYearChange}
-        onWeekChange={handleWeekChange}
-        onClearFilters={clearFilters}
-      />
+      <section aria-labelledby="filters-heading">
+        <FilterControls
+          availableYears={availableYears}
+          selectedYear={selectedYear}
+          selectedWeek={selectedWeek}
+          availableWeeks={getAvailableWeeks()}
+          onYearChange={handleYearChange}
+          onWeekChange={handleWeekChange}
+          onClearFilters={clearFilters}
+        />
+      </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <section aria-labelledby="charts-heading" className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <DengueChart 
           data={chartData.dengue} 
           title="Dengue Cases Over Time"
@@ -107,19 +108,23 @@ const App = () => {
           title="DHF Cases Over Time"
           color="#f87171"
         />
-      </div>
+      </section>
 
-      <DataSummary
-        totalRecords={totalRecords}
-        dengueCount={dengueCount}
-        dhfCount={dhfCount}
-      />
+      <section aria-labelledby="summary-heading">
+        <DataSummary
+          dengueCount={dengueCount}
+          dhfCount={dhfCount}
+        />
+      </section>
 
-      <DataTable
-        data={filteredData}
-        totalRecords={totalRecords}
-        showLimit={10}
-      />
+      <section aria-labelledby="data-heading">
+        <DataTable
+          data={filteredData}
+          selectedYear={selectedYear}
+          selectedWeek={selectedWeek}
+          showLimit={10}
+        />
+      </section>
     </DashboardLayout>
   );
 };
