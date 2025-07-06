@@ -1,13 +1,13 @@
 import React from 'react';
 
 const FilterControls = ({ 
-  availableYears, 
-  selectedYear, 
+  availableYears, // [2014, ..., 2018]
+  selectedYear, // Currently selected year or null
   selectedWeek, 
-  availableWeeks,
-  onYearChange, 
+  availableWeeks, // [1, ..., 53]
+  onYearChange, // handleYearChange
   onWeekChange, 
-  onClearFilters 
+  onClearFilters // clearFilters
 }) => {
   return (
     <div className="card bg-base-100 shadow-xl mb-6">
@@ -16,55 +16,58 @@ const FilterControls = ({
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           {/* Year Filter */}
-          <div className="form-control w-full">
-            <label className="label">
-              <span className="label-text font-semibold">Filter by Year</span>
+          <fieldset className="fieldset w-full">
+            <label className="label font-semibold" htmlFor="year-select">
+              Filter by Year
             </label>
             <select
+              id="year-select"
               value={selectedYear || ''}
               onChange={onYearChange}
-              className="select select-bordered w-full"
+              className="select w-full"
             >
               <option value="">All Years (2014-2018)</option>
               {availableYears.map(year => (
                 <option key={year} value={year}>{year}</option>
               ))}
             </select>
-          </div>
+          </fieldset>
           
           {/* Week Filter */}
-          <div className="form-control w-full">
-            <label className="label">
-              <span className="label-text font-semibold">Filter by Week</span>
+          <fieldset className="fieldset w-full">
+            <label className="label font-semibold" htmlFor="week-select">
+              Filter by Week
             </label>
             <select
+              id="week-select"
               value={selectedWeek || ''}
               onChange={onWeekChange}
               disabled={!selectedYear}
-              className="select select-bordered w-full"
+              className="select w-full"
             >
               <option value="">All Weeks (1-53)</option>
               {availableWeeks.map(week => (
                 <option key={week} value={week}>Week {week}</option>
               ))}
             </select>
-          </div>
+          </fieldset>
           
           {/* Current Filter */}
-          <div className="form-control w-full">
-            <label className="label">
-              <span className="label-text font-semibold">Current Filter</span>
+          <fieldset className="fieldset w-full">
+            <label className="label font-semibold" htmlFor="current-filter">
+              Current Filter
             </label>
-            <input 
-              type="text"
+            <textarea 
+              id="current-filter"
               value={selectedYear ? (selectedWeek ? `${selectedYear} - Week ${selectedWeek}` : `Year ${selectedYear}`) : 'All Data'}
               readOnly
-              className="input input-bordered w-full bg-base-200"
+              className="textarea w-full bg-base-200 resize-none min-h-12"
+              rows="1"
             />
-          </div>
+          </fieldset>
           
           {/* Clear filters */}
-          <div className="form-control w-full">
+          <fieldset className="fieldset w-full">
             <div className="label h-8"></div>
             <button 
               onClick={onClearFilters}
@@ -73,27 +76,28 @@ const FilterControls = ({
             >
               Clear Filters
             </button>
-          </div>
+          </fieldset>
         </div>
         
-        {/* Filter Description */}
-        <div className="mt-4 p-3 bg-base-200 rounded-lg">
+        {/* Dataset Info */}
+        <article className="mt-4 p-3 bg-base-200 rounded-lg">
           <p className="text-sm text-base-content/70">
              <strong>Tip:</strong> Select a year first to enable week filtering. 
             The dataset contains weekly lab-confirmed dengue and dengue haemorrhagic fever cases from 2014 to 2018.
           </p>
-          <p className="text-xs text-base-content/60 mt-2">
-             <strong>Data Source:</strong> Ministry of Health (MOH) Singapore - {" "}
+          <footer className="text-xs text-base-content/60 mt-2">
+             <strong>Data Source: </strong> 
+             <cite>Ministry of Health (MOH) Singapore</cite> - {" "}
             <a 
               href="https://data.gov.sg/datasets/d_ac1eecf0886ff0bceefbc51556247015/view" 
               target="_blank" 
-              rel="noopener noreferrer"
+              rel="noopener noreferrer external"
               className="link link-primary"
             >
               Weekly Number of Dengue and Dengue Haemorrhagic Fever Cases
             </a>
-          </p>
-        </div>
+          </footer>
+        </article>
       </div>
     </div>
   );
